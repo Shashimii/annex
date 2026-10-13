@@ -1,6 +1,7 @@
 import { CheckSquare, Settings, Wallet } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router'
 import { Badge } from '@/components/ui/badge'
+import { Toaster } from '@/components/ui/sonner'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -48,6 +49,7 @@ export function AppLayout() {
       </main>
 
       <footer className="py-6 text-center text-xs text-muted-foreground">Built by Shashimii</footer>
+      <Toaster position="bottom-center" />
     </div>
   )
 }
