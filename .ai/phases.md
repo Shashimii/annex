@@ -2,7 +2,7 @@
 
 Derived from [system.md](system.md). Each phase maps to a roadmap version, ends in something usable, and has a clear "done when" bar. Finish a phase before starting the next; later phases build on the earlier ones.
 
-**Where we are now (2026-10-13):** a fresh Vite + React 19 + TypeScript template. No git repo yet, none of the stack libraries installed, template boilerplate still present (`App.css`, `assets/hero.png`, template README).
+**Where we are now (2026-10-13):** Phase 1 done except the Vercel deploy. Phase 2 is built and unit-tested; its "done when" checks (a week of real use, full browser pass) are still open.
 
 ```
 Phase 1  v0.1  Foundation            scaffold, tooling, tokens, shell, money/date utils
@@ -22,17 +22,19 @@ Phase 8  v1.3  Reports               spending + focus charts (Recharts, lazy-loa
 **Goal:** a clean, deployed app shell with the full toolchain and the core utilities that everything else depends on.
 
 ### Tasks
-- [ ] `git init`, first commit, push to GitHub
-- [ ] Remove template boilerplate (`App.css`, `assets/*`, demo `App.tsx`); replace `README.md` with a short project README pointing to `.ai/system.md`
-- [ ] Install the stack: `tailwindcss` + `@tailwindcss/vite`, `react-router`, `zustand`, `dexie`, `zod`
-- [ ] Install `vitest` for unit tests (not in system.md; see Open questions)
-- [ ] Create the folder layout from system.md (`app/`, `features/budget`, `lib/`, `sync/`, `store/`, `components/`, `styles/`)
-- [ ] Design tokens: colors, spacing, radius, type scale. With Tailwind v4 these live in `src/styles/index.css` under `@theme` (system.md says `tailwind.config.ts`; see Open questions)
-- [ ] App shell: layout, nav, routes for **Budget**, **Tasks** (placeholder), **Settings**
-- [ ] `lib/money.ts`: `parseAmount("1,250.50") → 125050`, `formatAmount(125050) → "₱1,250.50"` via `Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' })`; reject negatives, zero, and more than 2 decimals
-- [ ] `lib/dates.ts`: `todayLocal()`, `monthKey(date)`, `prevMonth/nextMonth`, `monthRange`. **Never** use `toISOString().slice(0, 10)` for local dates: it's UTC, so in PH (UTC+8) anything logged before 8 AM lands on the previous day
-- [ ] Unit tests for `money.ts` and `dates.ts`
-- [ ] `.env.example` with `VITE_GOOGLE_CLIENT_ID`, `vercel.json` with the SPA rewrite
+- [x] `git init`, first commit, push to GitHub
+- [x] Remove template boilerplate (`App.css`, `assets/*`, demo `App.tsx`)
+- [x] Replace `README.md` with a short project README pointing to `.ai/system.md`
+- [x] Install the stack: `tailwindcss` + `@tailwindcss/vite`, `react-router`, `zustand`, `dexie`, `zod`
+- [x] shadcn/ui: `components.json`, `@/` alias, `button`, `card`, `badge`, `progress`, `separator` (add more with `npx shadcn@latest add <name>`)
+- [x] Install `vitest` for unit tests (not in system.md; see Open questions)
+- [x] Create the folder layout from system.md (`sync/` comes with Phase 3)
+- [x] Design tokens: shadcn CSS variables in `src/index.css` (`:root` / `.dark`, mapped in `@theme inline`); dark mode follows the system setting
+- [x] App shell: layout, nav, routes for **Budget** (index), **Tasks** (placeholder), **Settings** (placeholder), 404
+- [x] `lib/money.ts`: `parseAmount("1,250.50") → 125050`, `formatAmount(125050) → "₱1,250.50"` via `Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' })`; reject negatives, zero, and more than 2 decimals
+- [x] `lib/dates.ts`: `todayLocal()`, `monthKey`, `shiftMonth`, `isValidDate`, formatting (no `monthRange` needed: month queries use the `YYYY-MM-` prefix). **Never** use `toISOString().slice(0, 10)` for local dates: it's UTC, so in PH (UTC+8) anything logged before 8 AM lands on the previous day
+- [x] Unit tests for `money.ts` and `dates.ts`
+- [x] `.env.example` with `VITE_GOOGLE_CLIENT_ID`, `vercel.json` with the SPA rewrite
 - [ ] Connect the repo to Vercel so every push deploys (deploy early; Phase 3 needs a real URL for OAuth)
 
 ### Done when
@@ -47,18 +49,18 @@ Phase 8  v1.3  Reports               spending + focus charts (Recharts, lazy-loa
 **Goal:** the full v1 budget feature working offline in one browser, with no Google account involved.
 
 ### Tasks
-- [ ] `lib/schemas.ts`: Zod schemas for `Base`, `Entry`, `Category` (note max 80 chars, amount > 0 integer, `monthlyLimit` only on expense categories)
-- [ ] `lib/db.ts`: Dexie schema with `entries` (indexed by `date`, `categoryId`, `updatedAt`) and `categories`
-- [ ] **Dirty tracking now, not in Phase 3:** add a local-only `dirty: 0 | 1` field (Dexie can't index booleans), stripped before upload. Setting it from day one means no migration later
-- [ ] Data-access layer: `create`, `update`, `softDelete` that always set `updatedAt`, set `dirty`, and never hard-delete. All writes go through it
-- [ ] Seed default categories on first run with **fixed ids** (e.g. `default-expense-food`) so two devices that seed before their first sync don't end up with duplicate "Food" categories
-- [ ] Entry form: type toggle, amount (`inputmode="decimal"`), category, date (defaults to today), note; validated with Zod
-- [ ] Monthly view with month switcher
-- [ ] Summary card: income, spent, left (income − spent for the selected month)
-- [ ] Category budgets: set or clear `monthlyLimit`; progress bar with **near** at ≥ 80% and **over** at ≥ 100%
-- [ ] Entries list: newest first, delete (soft) with confirm or undo
-- [ ] Settings: manage categories (add, rename, reorder, set limit, soft-delete). Entries pointing at a deleted category still display
-- [ ] Zustand store for UI state (selected month, form state); reads from Dexie via live queries
+- [x] `lib/schemas.ts`: Zod schemas for `Base`, `Entry`, `Category` (note max 80 chars, amount > 0 integer, `monthlyLimit` only on expense categories)
+- [x] `lib/db.ts`: Dexie schema with `entries` (indexed by `date`, `categoryId`, `dirty`) and `categories`
+- [x] **Dirty tracking now, not in Phase 3:** add a local-only `dirty: 0 | 1` field (Dexie can't index booleans), stripped before upload. Setting it from day one means no migration later
+- [x] Data-access layer: `create`, `update`, `softDelete` that always set `updatedAt`, set `dirty`, and never hard-delete. All writes go through it
+- [x] Seed default categories on first run with **fixed ids** (e.g. `default-expense-food`) so two devices that seed before their first sync don't end up with duplicate "Food" categories
+- [x] Entry form: type toggle, amount (`inputmode="decimal"`), category, date (defaults to today), note; validated with Zod
+- [x] Monthly view with month switcher
+- [x] Summary card: income, spent, left (income − spent for the selected month)
+- [x] Category budgets: set or clear `monthlyLimit`; progress bar with **near** at ≥ 80% and **over** at ≥ 100%
+- [x] Entries list: newest first, delete (soft) with confirm or undo
+- [x] Settings: manage categories (add, rename, reorder, set limit, soft-delete). Entries pointing at a deleted category still display
+- [x] Zustand store for UI state (selected month, form state); reads from Dexie via live queries
 
 ### Done when
 - You can use Annex as your real budget for a week in one browser
@@ -72,7 +74,8 @@ Phase 8  v1.3  Reports               spending + focus charts (Recharts, lazy-loa
 **Goal:** the same data on every device, owned by the user, without the UI ever waiting on the network.
 
 ### Tasks
-- [ ] Google Cloud setup per system.md: Drive API, consent screen (External, Testing), `drive.appdata` scope, OAuth Web client with `localhost:5173` and the Vercel URL as origins
+- [ ] Pin the dev port in `vite.config.ts` (`server.port` + `strictPort`) so the OAuth origin is stable. Port 5173 is taken by another local project on this machine, so pick one (e.g. 5176, which `.claude/launch.json` already uses) and register that origin instead of `localhost:5173`
+- [ ] Google Cloud setup per system.md: Drive API, consent screen (External, Testing), `drive.appdata` scope, OAuth Web client with the pinned localhost port and the Vercel URL as origins
 - [ ] `sync/auth.ts`: load Google Identity Services, token client with `drive.appdata` only, token **in memory only**; on `401`, retry silently (`prompt: ''`), and show consent only if that fails; sign-out revokes the token
 - [ ] `sync/drive.ts`: list (`spaces=appDataFolder`), get media, create (multipart, `parents: ['appDataFolder']`), update media. Cache name → file id
 - [ ] `sync/merge.ts` as a **pure function** with thorough tests: newer `updatedAt` wins; deterministic tie-break on equal timestamps; a newer tombstone beats an older live copy; records that exist only on one side are kept
@@ -205,11 +208,11 @@ These are gaps or ambiguities in system.md worth settling before the phase that 
 | # | Question | Needed by | Suggested answer |
 |---|---|---|---|
 | 1 | Testing framework isn't in the stack | Phase 1 | Add **Vitest**; money and merge bugs are the costly ones |
-| 2 | Tailwind v4 is CSS-first; `tailwind.config.ts` is optional | Phase 1 | Keep tokens in `index.css` `@theme`, drop the config file |
-| 3 | Can entries be **edited**? Scope lists only delete | Phase 2 | Yes, tap an entry to edit; costs little and avoids delete-and-re-add |
-| 4 | Can users add, rename, or delete categories? | Phase 2 | Yes, in Settings; soft-deleted categories still label old entries |
-| 5 | Does "left" carry over unspent money between months? | Phase 2 | No, per month only, as written |
-| 6 | Where is dirty state kept? Not in the data model | Phase 2 | Local-only `dirty` field, never uploaded |
+| 2 | Tailwind v4 is CSS-first; `tailwind.config.ts` is optional | Phase 1 | **Settled:** tokens live in `src/index.css` (shadcn variables); no config file |
+| 3 | Can entries be **edited**? Scope lists only delete | Phase 2 | **Settled:** Yes, tap an entry to edit; costs little and avoids delete-and-re-add |
+| 4 | Can users add, rename, or delete categories? | Phase 2 | **Settled:** Yes, in Settings; soft-deleted categories still label old entries |
+| 5 | Does "left" carry over unspent money between months? | Phase 2 | **Settled:** No, per month only, as written |
+| 6 | Where is dirty state kept? Not in the data model | Phase 2 | **Settled:** Local-only `dirty` field, never uploaded |
 | 7 | PWA plugin isn't in the stack | Phase 4 | Add `vite-plugin-pwa` |
 | 8 | `listId` references a list type that isn't defined | Phase 6 | `TaskList = Base & { name; order }` in `lists.json` |
 | 9 | How to tell a running session from an abandoned one? Is there pause? | Phase 7 | Past planned end with no `endedAt` → mark complete at the planned end; no pause in v1.2 |
